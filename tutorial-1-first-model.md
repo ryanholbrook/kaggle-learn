@@ -25,7 +25,9 @@ After completing this course, you'll be able to answer questions like:
 
 You'll visualize a trend with a word, model this thing with this, do some cool deep learning with Keras, and do state-of-the-art forecasting with Facebook's Prophet.
 
-For your first lesson, you'll build a linear regression to forecast a trend. Be sure to review *these previous lessons* if you're feeling rusty.
+For your first lesson, you'll build a linear regression to forecast a trend. 
+
+You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/line-charts) Be sure to review *these previous lessons* if you're feeling rusty.
 
 
 # What is a Time Series? #
@@ -36,8 +38,13 @@ A **time series** is simply a sequence of observations together with the times t
 
 ```python
 import pandas as pd
+pd.plotting.register_matplotlib_converters()
 
-trends = pd.read_csv("data/trends.csv")
+# Read the file into a variable trends
+# Use parse_dates on any datetime columns
+trends = pd.read_csv("data/trends.csv", parse_dates = ["Week"])
+
+# View the first five weeks of the trends dataset
 trends.head()
 ```
 
@@ -46,15 +53,44 @@ The numbers in the `Interest` column represent the popularity for that week rela
 We can use the `set_index` method of `DataFrame` to make the `Week` column in `trends` the index column.
 
 ```python
+# Replace the index of the dataframe with the "Week" column
+# Use inplace to modify destructively instead of making a copy
 trends.set_index('Week', inplace = True)
+
+# View the first five weeks again. Now "Week" is the index
 trends.head()
 ```
 
-Time series are commonly plotted as line graphs, with the index along the x-axis. A line graph makes the ordered nature of a time series more apparent. `pandas` will plot a `Series` object like `trends` as a line graph by default.
+We could also have set the index column when we read the data by using the `index_col` argument in `read_csv`.
+
+# Plotting Time Series  #
 
 ```python
-trends.plot(figsize=(12,6));
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
 ```
+
+Time series are commonly plotted as line charts, with the index along the x-axis. A line charts makes the ordered nature of a time series more apparent. 
+
+`pandas` offers a quick way to plot timeseries with the `plot` method. It will create a [line chart](https://www.kaggle.com/alexisbcook/line-charts) by default, though that can be changed with the `kind` parameter.
+
+```python
+trends.plot(figsize=(16,6));
+```
+
+You learned about the [seaborn](https://seaborn.pydata.org/index.html) library in a previous micro-course. It is powerful and flexible.
+
+```python
+import statsmodels.api as sm
+# Change to seaborn plot style
+sns.set()
+
+plt.figure(figsize=(16,6))
+plt.title("Popularity of 'data science' as a search term", fontweight="bold")
+sns.lineplot(data=trends);
+```
+
 
 # A Regression Model #
 
@@ -83,45 +119,41 @@ trends_model = smf.ols("Interest ~ Week", train_data).fit()
 trends_model.summary()
 ```
 
-```python
-import statsmodels.api as sm
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
+Regression diagnostics.
 
-# Plot the regression line
-fig = sm.graphics.abline_plot(model_results = trends_model)
-fig.set_size_inches(12, 6)
-ax = fig.axes[0]
-ax.plot(train_data.Interest)
-loc = MultipleLocator(base = 48)
-ax.xaxis.set_major_locator(loc)
-plt.show()
+```python
+# In-sample predictions
+train_predictions = trends_model.predict(train_data)
+print(mean_absolute_error(train_data.Interest, train_predictions))
 ```
 
 Now we'll make a forecast.
 
 ```python
+# Out of sample predictions (the forecast)
 val_predictions = trends_model.predict(val_data)
 print(mean_absolute_error(val_data.Interest, val_predictions))
 ```
 
 
 ```python
-# Plot the regression line
-train_predictions = trends_model.predict()
-colors = sns.color_palette()
-fig = plt.plot(data.Interest)[0]
-ax = fig.axes
-ax.plot(train_predictions, color = colors[0])
-ax.plot(val_predictions, color = colors[3])
-loc = MultipleLocator(base = 48)
-ax.xaxis.set_major_locator(loc)
-plt.show()
+plt.figure(figsize=(12,6))
+plt.title("Fitted and forecast predictions from the regression model", fontweight="bold")
+plt.xlabel("Date", fontweight="bold")
+plt.ylabel("Interest", fontweight="bold")
+plt.legend(title="Predictions", loc="upper left")
+sns.lineplot(data=data.Interest, color="k")
+sns.lineplot(data=train_predictions, label="Fitted", color="b")
+sns.lineplot(data=val_predictions, label="Forecast", color="r");
 ```
 
 ## Your Turn ##
 
 You learned how to do forecasts with linear regression. When you're ready, move on to the first exercise!
+
+
+
+
 
 # Draft
 
