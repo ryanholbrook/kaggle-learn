@@ -12,8 +12,6 @@ jupyter:
     name: python3
 ---
 
-## Lesson 1 - Your First Model ##
-
 In this micro-course, you'll learn about modeling *time series*. Time series are common and important. Many Kaggle competitions have used time series.
 
 ![Image](https://image)
@@ -30,117 +28,108 @@ You'll visualize a trend with a word, model this thing with this, do some cool d
 For your first lesson, you'll build a linear regression to forecast a trend. Be sure to review *these previous lessons* if you're feeling rusty.
 
 
+# What is a Time Series? #
+
+A **time series** is simply a sequence of observations together with the times those observations occured. The times provide an **index** to the observations. Usually, the observations will have been made over some fixed time interval, like every hour or every month.
+
+[Data](https://trends.google.com/trends/explore?date=2015-01-25%202020-01-25&geo=US&q=data%20science) from Google Trends. This dataset shows the popularity of the search term `data science` from January 25, 2015 to January 25, 2020, with observations taken weekly.
+
 ```python
-%matplotlib inline
-import statsmodels.api as sm
 import pandas as pd
-import seaborn as sns
+
+trends = pd.read_csv("data/trends.csv")
+trends.head()
 ```
 
+The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular in the time given. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular."
 
-### What is a Time Series? ###
-
-A **time series** is a sequence of *observations* together with the *times* when those observations were taken. The sequence of times is called the *index* of the series.
-
-Here, for instance, is a portion of the `sunspots` dataset from the `statsmodels` package.
-
-```python jupyter={"source_hidden": true}
-sunspots = sm.datasets.sunspots.load_pandas().data
-sunspots.YEAR = pd.to_datetime(sunspots.YEAR, format='%Y')
-sunspots.set_index('YEAR', inplace=True)
-sunspots.head()
-```
-
-The `YEAR` column is the index and the `SUNACTIVITY` column is the sequence of observations for those years. A time series always has at least two dimensions.
-
-Time series are commonly plotted as line graphs, with the index along the x-axis. This helps us to see how the observations are changing over time.
-
-```python jupyter={"source_hidden": true}
-sunspots.plot(figsize=(8,6));
-```
-
-What makes time series unique is that consecutive observations in the series will usually be *dependent*. Each observation will determine, to an extent, the observation that comes next. How the weather is today will affect how the weather is tomorrow.
-
-This temporal dependence is both a useful source of information, but also a strong constraint. Most of the methods you've used in previous courses ...
-
-### The Data ###
-
-In this lesson, we will use linear regression to model a relationship persisting over time. The data set is here. Let's load it.
+We can use the `set_index` method of `DataFrame` to make the `Week` column in `trends` the index column.
 
 ```python
-icecream = sm.datasets.get_rdataset("Icecream", "Ecdat").data
-icecream = icecream.set_index(pd.date_range(start='03/18/1951', freq='4W', periods=len(icecream)))
-icecream.head()
+trends.set_index('Week', inplace = True)
+trends.head()
 ```
 
-We might guess that there could be a relationship between the temperature and the amount of icecream consumed.
+Time series are commonly plotted as line graphs, with the index along the x-axis. A line graph makes the ordered nature of a time series more apparent. `pandas` will plot a `Series` object like `trends` as a line graph by default.
 
 ```python
-ax = icecream[['temp', 'cons']].plot(secondary_y = 'cons', figsize=(8,6))
-ax.set_ylabel('Average Temperature (in Fahrenheit)')
-ax.right_ax.set_ylabel('Consumption of Icecream per head (in pints)');
+trends.plot(figsize=(12,6));
 ```
 
-Now we'll define the prediction target and the features. 
+# A Regression Model #
+
+What makes time series unique is that consecutive observations in the series will usually be *dependent*. Today tells us about tomorrow.
+
+So, since the time index informs us about the observations, we could treat a forecasting problem as a regression problem. We could treat the series of observations as the target and the index as a feature.
+
+In this lesson, we will use a [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression) model from the `statsmodels` module. `statsmodels` is like the `sklearn` of time series and other statistical models. We'll use it throughout this course.
+
 
 ```python
-y = icecream.cons.values
-x = icecream.temp.values.reshape(-1, 1)
+from sklearn.model_selection import train_test_split
+
+data = trends.copy()
+data['Week'] = range(len(data.Interest))
+train_data, val_data = train_test_split(data, test_size = 0.2, shuffle = False)
 ```
 
-Define the model.
+The easiest way to get started with `statsmodels` is through its [formula interface](https://www.statsmodels.org/stable/example_formulas.html). Formulas in `statsmodels` work the same way as formulas in R. Instead of passing in our variables as arrays, we specify the regression relationship with a special kind of string and let `statsmodels` create the arrays for us. For OLS, the form is `"target ~ feature"`.
 
 ```python
-from sklearn.linear_model import LinearRegression
+import statsmodels.formula.api as smf
+from sklearn.metrics import mean_absolute_error
 
-icecream_model = LinearRegression()
-icecream_model.fit(x, y)
-
-icecream_model.intercept_
-icecream_model.coef_
+trends_model = smf.ols("Interest ~ Week", train_data).fit()
+trends_model.summary()
 ```
-
-
-### Training the Model ###
-
-Use linear regression. Split the data and train.
 
 ```python
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 
+# Plot the regression line
+fig = sm.graphics.abline_plot(model_results = trends_model)
+fig.set_size_inches(12, 6)
+ax = fig.axes[0]
+ax.plot(train_data.Interest)
+loc = MultipleLocator(base = 48)
+ax.xaxis.set_major_locator(loc)
+plt.show()
 ```
 
-Make a plot
+Now we'll make a forecast.
 
 ```python
-
+val_predictions = trends_model.predict(val_data)
+print(mean_absolute_error(val_data.Interest, val_predictions))
 ```
 
-### Forecasting ###
-
-Now use the model to make a forecast.
 
 ```python
-
+# Plot the regression line
+train_predictions = trends_model.predict()
+colors = sns.color_palette()
+fig = plt.plot(data.Interest)[0]
+ax = fig.axes
+ax.plot(train_predictions, color = colors[0])
+ax.plot(val_predictions, color = colors[3])
+loc = MultipleLocator(base = 48)
+ax.xaxis.set_major_locator(loc)
+plt.show()
 ```
 
-Plot the result.
-
-```python
-
-```
-
-Evaluate the forecast.
-
-```python
-
-```
-
-
-### Your Turn ###
+## Your Turn ##
 
 You learned how to do forecasts with linear regression. When you're ready, move on to the first exercise!
 
 # Draft
+
+Our least-squares model is equivalent to the *[Average method](https://otexts.com/fpp2/simple-methods.html)* of forecasting but applied to weekly changes in interest.
+
+
+This temporal dependence is both a useful source of information, but also a strong constraint. Most of the methods you've used in previous courses ...
+
 
 Ordinary methods of prediction (like linear regression or boosting) work best when the training set closely resembles the test set. This means that it is important to make sure your data is randomized before splitting it in any way, like for cross-validation. You want to shuffle a deck of cards before dealing to deal fair hands.
 
