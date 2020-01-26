@@ -6,18 +6,17 @@ Learn how to make forecasts with one of the most common kinds of data in the rea
 ## Outline ##
 
 1. Linear Trends
-2. Simple Baselines
-3. Regression
-4. Exponential Smoothing
-5. ARIMA Models
-6. Cross Validation
-7. Facebook's Prophet
-8. Lag-Embedding
-9. Deep Learning Models
-
+2. Decomposing Time Series
+3. Simple Baselines
+4. Evaluating Models
+5. Regression
+6. Exponential Smoothing
+7. ARIMA Models
+8. Facebook's Prophet
+9. Lag-Embedding
+10. Deep Learning
 
 ## Summaries ##
-
 ### Linear Trends ###
 
 Explore time series and make predictions with a trend-line.
@@ -26,6 +25,14 @@ Explore time series and make predictions with a trend-line.
 - Plotting Time Series
 - Fitting a Trend-Line
 - Forecasting
+
+### Decomposing Time Series ###
+
+Discover the parts of a time series.
+
+- Trend
+- Seasonal
+- Random
 
 ### Simple Baselines ###
 
@@ -66,6 +73,13 @@ Use a SOTA model popular in competitions.
 
 When is a time series not a time series? When it's a lag embedding!
 
-### Deep Learning Models ###
+- Why Lag Embedding
+- Embed a Time Series
+- Forecast with XGBoost and Random Forest
+
+### Deep Learning ###
 
 Design a sequence model with Keras.
+
+- LSTM
+- RNN
