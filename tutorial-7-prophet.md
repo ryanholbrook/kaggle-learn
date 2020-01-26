@@ -16,12 +16,14 @@ jupyter:
 
 ```python
 import pandas as pd
+from statsmodels.tsa.tsatools import detrend
 from fbprophet import Prophet
 from fbprophet.plot import add_changepoints_to_plot
 pd.plotting.register_matplotlib_converters()
 
-df = pd.read_csv("data/machinelearning.csv")
+df = pd.read_csv("data/datascience.csv")
 df.rename(columns={"Week":"ds", "Interest":"y"}, inplace=True)
+df["y"] = detrend(df.y)/4
 m = Prophet()
 m.fit(df)
 future = m.make_future_dataframe(periods=365)
@@ -29,11 +31,9 @@ future.tail()
 forecast = m.predict(future)
 forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
 
+sns.set_style("white")
 m.plot(forecast)
-add_changepoints_to_plot(fig.gca(), m, forecast, cp_color="r", trend=True)
-plt.title("Prophet", fontweight="bold")
-plt.xlabel("Time", fontweight="bold")
-plt.ylabel("Popularity", fontweight="bold")
+sns.axes_style({'axes.grid'})
 plt.show()
 
 m.plot_components(forecast)
