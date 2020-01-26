@@ -1,11 +1,11 @@
 # Kaggle Learn Micro-Course - Time Series #
 
-Learn about time series, how to make forecasts, and effective ways of dealing with time dependent data.
+Learn about time-dependent data, how to make forecasts, and how to evaluate.
 
 ## Outline ##
 
 1. Your First Model
-2. Tricks for Time Series in Pandas
+2. Simple Baselines
 3. Exploring Time Series
 4. Regression Models
 5. Exponential Smoothing Models
@@ -16,4 +16,42 @@ Learn about time series, how to make forecasts, and effective ways of dealing wi
 10. Lag-Embedding Models
 11. Deep Learning Models with Keras
 12. Clustering and Classification
+
+## Summary ##
+
+### Your First Model ###
+
+
+
+### Simple Baselines ###
+
+
+### Exploring Time Series ###
+
+
+### Regression Models ###
+
+
+### Exponential Smoothing Models ###
+
+
+### Evaluating Models ###
+
+
+### ARIMA Models ###
+
+
+### Facebook's Prophet ###
+
+
+### State Space Models ###
+
+
+### Lag-Embedding Models ###
+
+
+### Deep Learning Models with Keras ###
+
+
+### Clustering and Classification ###
 

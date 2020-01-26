@@ -27,7 +27,7 @@ You'll visualize a trend with a word, model this thing with this, do some cool d
 
 For your first lesson, you'll build a linear regression to forecast a trend. 
 
-You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/line-charts) Be sure to review *these previous lessons* if you're feeling rusty.
+You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/hello-seaborn). You'll have a leg up if you've done some work on the [House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) competition, but we'll review what we need as we go.
 
 
 # What is a Time Series? #
@@ -41,49 +41,36 @@ import pandas as pd
 pd.plotting.register_matplotlib_converters()
 
 # Read the file into a variable trends
-# Use parse_dates on any datetime columns
-trends = pd.read_csv("data/trends.csv", parse_dates = ["Week"])
+# Parse the "Week" column as a date and set it as the index
+trends = pd.read_csv("data/datascience.csv", parse_dates=["Week"], index_col="Week")
 
 # View the first five weeks of the trends dataset
 trends.head()
 ```
 
-The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular in the time given. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular."
+The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular over the time observed. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular."
 
-We can use the `set_index` method of `DataFrame` to make the `Week` column in `trends` the index column.
-
-```python
-# Replace the index of the dataframe with the "Week" column
-# Use inplace to modify destructively instead of making a copy
-trends.set_index('Week', inplace = True)
-
-# View the first five weeks again. Now "Week" is the index
-trends.head()
-```
-
-We could also have set the index column when we read the data by using the `index_col` argument in `read_csv`.
 
 # Plotting Time Series  #
 
 ```python
 import matplotlib.pyplot as plt
 %matplotlib inline
+```
+
+Time series are commonly represented as [line charts](https://www.kaggle.com/alexisbcook/line-charts), with the index along the x-axis. A line chart emphasizes the ordered nature of a time series.
+
+You can quickly plot a data frame with the `plot` method. For time series, `pandas` will create a line chart by default.
+
+```python
+trends.plot();
+```
+
+You learned about [seaborn](https://seaborn.pydata.org/index.html) in a previous micro-course. `seaborn` is a powerful and flexible supplement to `matplotlib` for statistical visualization. We'll use it for most of our plots.
+
+```python
 import seaborn as sns
-```
-
-Time series are commonly plotted as line charts, with the index along the x-axis. A line charts makes the ordered nature of a time series more apparent. 
-
-`pandas` offers a quick way to plot timeseries with the `plot` method. It will create a [line chart](https://www.kaggle.com/alexisbcook/line-charts) by default, though that can be changed with the `kind` parameter.
-
-```python
-trends.plot(figsize=(16,6));
-```
-
-You learned about the [seaborn](https://seaborn.pydata.org/index.html) library in a previous micro-course. It is powerful and flexible.
-
-```python
-import statsmodels.api as sm
-# Change to seaborn plot style
+# Change to seaborn style and set some nice defaults
 sns.set()
 
 plt.figure(figsize=(16,6))
@@ -94,74 +81,124 @@ sns.lineplot(data=trends);
 
 # A Regression Model #
 
-What makes time series unique is that consecutive observations in the series will usually be *dependent*. Today tells us about tomorrow.
+What makes a time series unique is that consecutive observations in the series will usually be *dependent*. Today tells us about tomorrow.
 
 So, since the time index informs us about the observations, we could treat a forecasting problem as a regression problem. We could treat the series of observations as the target and the index as a feature.
 
-In this lesson, we will use a [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression) model from the `statsmodels` module. `statsmodels` is like the `sklearn` of time series and other statistical models. We'll use it throughout this course.
+To make a forecast on our series, we will fit a *linear trendline* using [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression).
+
+## Prepare Data ##
 
 
 ```python
 from sklearn.model_selection import train_test_split
 
 data = trends.copy()
+# Add a numeric column for the model to fit on
 data['Week'] = range(len(data.Interest))
+
+# Split the data into a training set and a validation set
+# The order of the observations is important, so don't shuffle
 train_data, val_data = train_test_split(data, test_size = 0.2, shuffle = False)
 ```
 
-The easiest way to get started with `statsmodels` is through its [formula interface](https://www.statsmodels.org/stable/example_formulas.html). Formulas in `statsmodels` work the same way as formulas in R. Instead of passing in our variables as arrays, we specify the regression relationship with a special kind of string and let `statsmodels` create the arrays for us. For OLS, the form is `"target ~ feature"`.
+## Define and Fit Model ##
+
+`statsmodels` is like the `sklearn` of time series and other statistical models. We'll use it throughout this micro-course.
+
+Let's take a moment to get acquainted with `statsmodels`.
+
+The easiest way to get started with `statsmodels` is through its [formula interface](https://www.statsmodels.org/stable/example_formulas.html). Formulas in `statsmodels` work the same way as formulas in R. Instead of passing in our variables as arrays (like in `sklearn`), in `statsmodels` we can specify the regression relationship with a special kind of string and let `statsmodels` create the arrays for us.
+
+For OLS, the form is `"target ~ feature"`.
 
 ```python
 import statsmodels.formula.api as smf
-from sklearn.metrics import mean_absolute_error
 
+# Fit an ordinary least-squares model using the formula interface
 trends_model = smf.ols("Interest ~ Week", train_data).fit()
-trends_model.summary()
+# Look at the fitted coefficients of the least-squares line
+trends_model.params
 ```
 
-Regression diagnostics.
+The coefficients say: "Predict about 27 points of Interest for the first week, and about 0.24 more points for every week that goes by."
+
+
+## Evaluate ##
 
 ```python
-# In-sample predictions
+from sklearn.metrics import mean_squared_error
+
+# In-sample predictions and RMSE
 train_predictions = trends_model.predict(train_data)
-print(mean_absolute_error(train_data.Interest, train_predictions))
-```
-
-Now we'll make a forecast.
-
-```python
-# Out of sample predictions (the forecast)
+rmse_train = mean_squared_error(train_data.Interest, train_predictions, squared=False)
+# Out-of-sample predictions (the forecast) and RMSE
 val_predictions = trends_model.predict(val_data)
-print(mean_absolute_error(val_data.Interest, val_predictions))
+rmse_val = mean_squared_error(val_data.Interest, val_predictions, squared=False)
+
+print("RMSE of fitted predictions:")
+print(rmse_train)
+print()
+print("RMSE of forecast predictions:")
+print(rmse_val)
 ```
 
+Our error increased by about 38% from the training set to the validation set. This indicates that our model may be having some trouble generalizing.
+
+### Interpret ###
+
+Let's make a plot of our predictions to get a better idea of what's going on.
 
 ```python
-plt.figure(figsize=(12,6))
+plt.figure(figsize=(16,6))
+sns.lineplot(data=data.Interest, alpha=0.5)
+sns.lineplot(data=train_predictions, label="Fitted", color="b")
+sns.lineplot(data=val_predictions, label="Forecast", color="r");
 plt.title("Fitted and forecast predictions from the regression model", fontweight="bold")
 plt.xlabel("Date", fontweight="bold")
 plt.ylabel("Interest", fontweight="bold")
 plt.legend(title="Predictions", loc="upper left")
-sns.lineplot(data=data.Interest, color="k")
-sns.lineplot(data=train_predictions, label="Fitted", color="b")
-sns.lineplot(data=val_predictions, label="Forecast", color="r");
+plt.show()
 ```
+
+There is an obvious seasonal ##cyclic?## component to our data. You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) We'll develop models in future lessons that can make use of information like this and give us better predictions.
+
+
+## Conclusion ##
+
+The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've proabaly worked with before function best, work best when your applied to data that are iid.
+
 
 ## Your Turn ##
 
-You learned how to do forecasts with linear regression. When you're ready, move on to the first exercise!
+So now you know how to make forecasts using a linear trendline. When you're ready, move on to the first exercise!
 
 
+# Exercises #
+
+## Load the Data ##
+
+In this exercise, you'll investigate the popularity trend of the search term ["machine learning"](https://trends.google.com/trends/explore?date=2015-01-25%202020-01-25&geo=US&q=machine%20learning) as given by Google Trends.
+
+## Plot It ##
+
+## Split the Data ##
+
+It is important that you do not shuffle time series data before splitting it. With time series, the order of our data sets must be preserved.
+
+## Fit the Regression Model ##
+
+## Evaluate ##
+
+## Discuss ##
 
 
 
 # Draft
 
-Our least-squares model is equivalent to the *[Average method](https://otexts.com/fpp2/simple-methods.html)* of forecasting but applied to weekly changes in interest.
-
+Our least-squares model is almost equivalent to the *[Average method](https://otexts.com/fpp2/simple-methods.html)* of forecasting but applied to weekly changes in Interest. The expectation of both models are the same (the slope), but the error terms are different. OLS give the error term, but differencing gives a series of error terms.
 
 This temporal dependence is both a useful source of information, but also a strong constraint. Most of the methods you've used in previous courses ...
-
 
 Ordinary methods of prediction (like linear regression or boosting) work best when the training set closely resembles the test set. This means that it is important to make sure your data is randomized before splitting it in any way, like for cross-validation. You want to shuffle a deck of cards before dealing to deal fair hands.
 
@@ -181,4 +218,18 @@ longley.head()
 orange = sm.datasets.get_rdataset("Orange", "Ecdat").data
 orange.set_index(pd.date_range(start='01/1948', freq='M', periods=642))
 orange.head()
+```
+
+### Looking Ahead ###
+
+Sometimes, you'll want to model the *change* in a time series instead of the values of the observations themselves. In finance, for instance, it is much more common to model the *returns* of a stock than to model its price.
+
+It turns out that our least-squares model is equivalent (for infintely large samples) to a simple baseline model known as the [average method](https://otexts.com/fpp2/simple-methods.html), when the average method is used on the *change* in values over each period. The average method would predict that all future change in the popularity of "data science" would be the average of all the observed change. As we saw, #TODO# our model predicted change each week #END_TODO#.
+
+In the next lesson, you'll learn how to 
+
+We will look at a number of powerful time-series models in this microcourse. Nonetheless, it is important to understand even simplest models like the average method. There's no reason to waste time on a complicated model if it can't even beat a simple average!
+
+```R
+1
 ```
