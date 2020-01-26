@@ -12,7 +12,9 @@ jupyter:
     name: python3
 ---
 
-In this micro-course, you'll learn about modeling *time series*. Time series are common and important. Many Kaggle competitions have used time series.
+# Welcom to Time Series! #
+
+In this micro-course you'll learn an invaluble skill: how to predict the future!
 
 ![Image](https://image)
 
@@ -60,7 +62,7 @@ import matplotlib.pyplot as plt
 
 Time series are commonly represented as [line charts](https://www.kaggle.com/alexisbcook/line-charts), with the index along the x-axis. A line chart emphasizes the ordered nature of a time series.
 
-You can quickly plot a data frame with the `plot` method. For time series, `pandas` will create a line chart by default.
+You can quickly plot a data frame with the `DataFrame.plot` method. For time series, `pandas` will create a line chart by default.
 
 ```python
 trends.plot();
@@ -79,16 +81,18 @@ sns.lineplot(data=trends);
 ```
 
 
-# A Regression Model #
+# Fitting a Trend-Line #
 
 What makes a time series unique is that consecutive observations in the series will usually be *dependent*. Today tells us about tomorrow.
 
 So, since the time index informs us about the observations, we could treat a forecasting problem as a regression problem. We could treat the series of observations as the target and the index as a feature.
 
-To make a forecast on our series, we will fit a *linear trendline* using [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression).
+To make a forecast on our series, we will fit a *linear trend-line* using [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature.
+
 
 ## Prepare Data ##
 
+There are two issues we must address when preparing our data for training. First, the feature must be numeric. Second, we have to be careful splitting.
 
 ```python
 from sklearn.model_selection import train_test_split
@@ -102,15 +106,13 @@ data['Week'] = range(len(data.Interest))
 train_data, val_data = train_test_split(data, test_size = 0.2, shuffle = False)
 ```
 
-## Define and Fit Model ##
+## Define and Fit the Model ##
 
-`statsmodels` is like the `sklearn` of time series and other statistical models. We'll use it throughout this micro-course.
-
-Let's take a moment to get acquainted with `statsmodels`.
+The `statsmodels` library is like the `sklearn` of time series. 
 
 The easiest way to get started with `statsmodels` is through its [formula interface](https://www.statsmodels.org/stable/example_formulas.html). Formulas in `statsmodels` work the same way as formulas in R. Instead of passing in our variables as arrays (like in `sklearn`), in `statsmodels` we can specify the regression relationship with a special kind of string and let `statsmodels` create the arrays for us.
 
-For OLS, the form is `"target ~ feature"`.
+For simple linear regression, we write the formula as: `"target ~ feature"`.
 
 ```python
 import statsmodels.formula.api as smf
@@ -161,17 +163,17 @@ plt.legend(title="Predictions", loc="upper left")
 plt.show()
 ```
 
-There is an obvious seasonal ##cyclic?## component to our data. You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) We'll develop models in future lessons that can make use of information like this and give us better predictions.
+There is an obvious seasonal ##cyclic?## component to our data. You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) There's information we aren't using that could help us make our predictions better. In future lessons, we'll see models that can make use of this kind of information.
 
 
 ## Conclusion ##
 
-The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've proabaly worked with before function best, work best when your applied to data that are iid.
+The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've probably worked with before function best, work best when your applied to data that are iid.
 
 
 ## Your Turn ##
 
-So now you know how to make forecasts using a linear trendline. When you're ready, move on to the first exercise!
+Now you know how to make forecasts using a linear trend-line. When you're ready, move on to the first exercise!
 
 
 # Exercises #
@@ -191,45 +193,3 @@ It is important that you do not shuffle time series data before splitting it. Wi
 ## Evaluate ##
 
 ## Discuss ##
-
-
-
-# Draft
-
-Our least-squares model is almost equivalent to the *[Average method](https://otexts.com/fpp2/simple-methods.html)* of forecasting but applied to weekly changes in Interest. The expectation of both models are the same (the slope), but the error terms are different. OLS give the error term, but differencing gives a series of error terms.
-
-This temporal dependence is both a useful source of information, but also a strong constraint. Most of the methods you've used in previous courses ...
-
-Ordinary methods of prediction (like linear regression or boosting) work best when the training set closely resembles the test set. This means that it is important to make sure your data is randomized before splitting it in any way, like for cross-validation. You want to shuffle a deck of cards before dealing to deal fair hands.
-
-A time series, however, must be kept in order. The *order* of the time series is what encodes its time-dependent information. Shuffling the time series would destroy that. If you shuffle a time series of daily temperatures for a year, you no longer have seasons.
-
-All of the practices you have learned in previous lessons -- like model validation and exploratory analysis -- are still important, but they will have to be modified to account for this time dependence. Some of the models you have learned can also be used to make predictions with time series, but we will develop several new models designed especially to make use of the time dependence.
-
-
-```python
-longley = sm.datasets.longley.load_pandas().data
-longley.YEAR = pd.to_datetime(longley.YEAR, format='%Y')
-longley.set_index('YEAR', inplace=True)
-longley.head()
-```
-
-```python
-orange = sm.datasets.get_rdataset("Orange", "Ecdat").data
-orange.set_index(pd.date_range(start='01/1948', freq='M', periods=642))
-orange.head()
-```
-
-### Looking Ahead ###
-
-Sometimes, you'll want to model the *change* in a time series instead of the values of the observations themselves. In finance, for instance, it is much more common to model the *returns* of a stock than to model its price.
-
-It turns out that our least-squares model is equivalent (for infintely large samples) to a simple baseline model known as the [average method](https://otexts.com/fpp2/simple-methods.html), when the average method is used on the *change* in values over each period. The average method would predict that all future change in the popularity of "data science" would be the average of all the observed change. As we saw, #TODO# our model predicted change each week #END_TODO#.
-
-In the next lesson, you'll learn how to 
-
-We will look at a number of powerful time-series models in this microcourse. Nonetheless, it is important to understand even simplest models like the average method. There's no reason to waste time on a complicated model if it can't even beat a simple average!
-
-```R
-1
-```
