@@ -16,6 +16,8 @@ jupyter:
 
 In this micro-course you'll learn an invaluble skill: how to predict the future!
 
+![Image](/images/header.png)
+
 After completing this micro-course, you'll be able to:
 - Forecast the trend of a search term with linear regression.
 - Predict the daily page-views of a website with [Prophet](https://facebook.github.io/prophet/).
@@ -23,11 +25,8 @@ After completing this micro-course, you'll be able to:
 - Find highly-profitable customers with a Markov model.
 - Build deep learning models to handle even the most complex data sets.
 
-
-
 You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/hello-seaborn). You'll have a leg up if you've done some work on the [House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) competition, but we'll review what we need as we go.
 
-![Image](/images/prophet.png)
 
 # What is a Time Series? #
 
