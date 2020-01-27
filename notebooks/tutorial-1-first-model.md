@@ -12,25 +12,22 @@ jupyter:
     name: python3
 ---
 
-# Welcom to Time Series! #
+# Welcome to Time Series! #
 
 In this micro-course you'll learn an invaluble skill: how to predict the future!
 
-![Image](https://image)
+After completing this micro-course, you'll be able to:
+- Forecast the trend of a search term with linear regression.
+- Predict the daily page-views of a website with [Prophet](https://facebook.github.io/prophet/).
+- Estimate market demand for a ride-sharing company with XGBoost.
+- Find highly-profitable customers with a Markov model.
+- Build deep learning models to handle even the most complex data sets.
 
-After completing this course, you'll be able to answer questions like:
-- How many things will someone buy?
-- How many passengers will an airline have?
-- When will disasters occur?
-- What is trending on Google?
-- How many hits will a website have?
 
-You'll visualize a trend with a word, model this thing with this, do some cool deep learning with Keras, and do state-of-the-art forecasting with Facebook's Prophet.
-
-For your first lesson, you'll build a linear regression to forecast a trend. 
 
 You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/hello-seaborn). You'll have a leg up if you've done some work on the [House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) competition, but we'll review what we need as we go.
 
+![Image](images/prophet.png)
 
 # What is a Time Series? #
 
@@ -90,15 +87,23 @@ So, since the time index informs us about the observations, we could treat a for
 To make a forecast on our series, we will fit a *linear trend-line* using [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature.
 
 
-## Prepare Data ##
+# Prepare Data #
 
-There are two issues we must address when preparing our data for training. First, the feature must be numeric. Second, we have to be careful splitting.
+There are two issues we must address when preparing our data for training. 
+
+First, regression models require their features to be numeric. We can construct a "time dummy" for the "Weeks" column. The time dummy is just an enumeration of the observations in the time series, beginning at 1.
+
+Second, we need to be careful when we split our data. Ordinarily, it is good practice to suffle your data set before splitting to ensure the splits are independent. But independent is exactly what the observations in a time series are not. By shuffling, we would destroy that.
+
+In forecasting, we want to use information about the past to predict the future. We want to make sure, therefore, that all of the validation data occurs *after* the training data.
+
+The validation set should always be later in time than the training set.
 
 ```python
 from sklearn.model_selection import train_test_split
 
 data = trends.copy()
-# Add a numeric column for the model to fit on
+# Construct the "time dummy": 1, 2, 3, ...
 data['Week'] = range(len(data.Interest))
 
 # Split the data into a training set and a validation set
@@ -106,7 +111,7 @@ data['Week'] = range(len(data.Interest))
 train_data, val_data = train_test_split(data, test_size = 0.2, shuffle = False)
 ```
 
-## Define and Fit the Model ##
+# Define and Fit the Model #
 
 The `statsmodels` library is like the `sklearn` of time series. 
 
@@ -126,7 +131,7 @@ trends_model.params
 The coefficients say: "Predict about 27 points of Interest for the first week, and about 0.24 more points for every week that goes by."
 
 
-## Evaluate ##
+# Evaluate the Model #
 
 ```python
 from sklearn.metrics import mean_squared_error
@@ -147,7 +152,7 @@ print(rmse_val)
 
 Our error increased by about 38% from the training set to the validation set. This indicates that our model may be having some trouble generalizing.
 
-### Interpret ###
+# Interpret Predictions #
 
 Let's make a plot of our predictions to get a better idea of what's going on.
 
@@ -166,30 +171,11 @@ plt.show()
 There is an obvious seasonal ##cyclic?## component to our data. You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) There's information we aren't using that could help us make our predictions better. In future lessons, we'll see models that can make use of this kind of information.
 
 
-## Conclusion ##
+# Conclusion #
 
 The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've probably worked with before function best, work best when your applied to data that are iid.
 
 
-## Your Turn ##
+# Your Turn #
 
 Now you know how to make forecasts using a linear trend-line. When you're ready, move on to the first exercise!
-
-
-# Exercises #
-
-## Load the Data ##
-
-In this exercise, you'll investigate the popularity trend of the search term ["machine learning"](https://trends.google.com/trends/explore?date=2015-01-25%202020-01-25&geo=US&q=machine%20learning) as given by Google Trends.
-
-## Plot It ##
-
-## Split the Data ##
-
-It is important that you do not shuffle time series data before splitting it. With time series, the order of our data sets must be preserved.
-
-## Fit the Regression Model ##
-
-## Evaluate ##
-
-## Discuss ##

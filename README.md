@@ -3,21 +3,11 @@
 Learn how to make forecasts with one of the most common kinds of data in the real world.
 
 
-# Outline #
-
-1. Linear Trends
-2. Decomposing Time Series
-3. Simple Baselines
-4. Evaluating Models
-5. Regression
-6. Exponential Smoothing
-7. ARIMA Models
-8. Facebook's Prophet
-9. Delay-Embedding
-10. Deep Learning
-
-# Summaries #
+# Lessons #
 ## Linear Trends ##
+
+- [Tutorial Notebook](notebooks/tutorial-1-first-model.ipynb)
+- [Exercises Notebook](notebooks/exercises-1-first-model.ipynb)
 
 Explore time series and make predictions with a trend-line.
 
