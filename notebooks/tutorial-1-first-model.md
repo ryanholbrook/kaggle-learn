@@ -19,11 +19,11 @@ In this micro-course you'll learn an invaluble skill: how to predict the future!
 ![Image](../images/header.png)
 
 After completing this micro-course, you'll be able to:
-- Forecast the trend of a search term with linear regression.
+- Forecast the popularity of a search term with linear regression.
 - Predict the daily page-views of a website with [Prophet](https://facebook.github.io/prophet/).
 - Estimate market demand for a ride-sharing company with XGBoost.
-- Find highly-profitable customers with a Markov model. And,
-- Build deep learning models to handle even the most complex data sets.
+- Discover highly-profitable customers with a Markov model. And,
+- Build a deep learning model with Keras and predict the weather.
 
 You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/hello-seaborn). You'll have a leg up if you've done some work on the [House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) competition, but we'll review what we need as we go.
 
@@ -34,16 +34,16 @@ A **time series** is simply a sequence of observations together with the times t
 
 Time series are very common. They occur virtually anywhere data is collected sequentially over time. They have been used to analyze and predict: economic growth, volatility in financial markets, neural behavior, natural disasters like earthquakes and volcanoes, and many others.
 
-What characterizes time series is that their observations are sequentially **dependent**. That is, the ordering of the observations is important. This is in contrast to ordinary data sets where the rows can be taken in any order without affecting the analysis.
+What characterizes time series is that their observations are sequentially **dependent**. How the observations are ordered in time is important. This different from ordinary data sets where the rows can be taken in any order without affecting the analysis.
 
 Time series analysis is mostly about working with the extra information that this time dependence provides. Over this micro-course, you'll learn about a number of models especially designed for time series and what to do to make sure you get the most from your data.
 
 
 # Your Problem #
 
-Let's suppose you work for a book publisher. Your boss has heard that data science has been getting popular and she thinks this might be a market opportunity. She asks you describe how interest in data science has been trending over the last five years, and to forecast the interest one year into the future.
+Let's suppose you work for a book publisher. Your boss has heard that data science has been getting popular. She thinks there could be a market opportunity for a new textbook, but she wants to know if this popularity will continue. She asks you to describe how interest in data science has been trending over the past five years, and to make a forecast one year into the future.
 
-You turn to [Google Trends](https://trends.google.com/trends/). With Google Trends you can get a report of the relative popularity over time of search terms on Google. For your analysis, you decide to investigate the popularity of the search term "data science", and you retrieve a CSV file for the period of January 25, 2015 to January 25, 2020, with observations taken weekly. (Click 
+You turn to [Google Trends](https://trends.google.com/trends/). With Google Trends you can get a report of how popular a search term has been over time. For your analysis, you decide to investigate the term "data science", and you retrieve a CSV file for the period of January 25, 2015 to January 25, 2020, with observations taken weekly. (Click 
 [here](https://trends.google.com/trends/explore?date=2015-01-25%202020-01-25&geo=US&q=data%20science) for an interactive graph of this data set.)
 
 First, let's load the data into a Pandas DataFrame.
@@ -64,9 +64,9 @@ And let's get a quick overview.
 datascience.head()
 ```
 
-The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular over the time observed. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular."
+The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular over the time observed. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term."
 
-And we'll glance at some summary statistics.
+It's good to look at some summary statistics to know what to expect from your data.
 
 ```python
 datascience.describe()
@@ -118,11 +118,11 @@ Because time series are temporally dependent, there ought to be some predictive 
 
 One of the most important ways a time series can depend on time is through a *trend*, meaning a steady rise or fall in the series. Whenever a series is constantly increasing or constantly decreasing on the average, we can capture this trend with a line.
 
-For our first model, we will fit a *linear trend-line* using [simple linear regression ](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature.
+For our first model, we will fit a *linear trend-line* using [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature.
 
 | ![Time Series with a Linear Trend](../images/linear-trend.png) |
 |:--:|
-| **A Time Series with a Linear Trend** |
+| *A Time Series with a Linear Trend* |
 
 # Prepare Data #
 
@@ -176,7 +176,7 @@ The `Intercept` parameter tells us the y-intercept for the line and the `Week` p
 
 # Evaluate the Model #
 
-We'll evaluate our predictions with RMSE. In future lessons, we'll learn other metrics that are often used with time series.
+We'll evaluate our predictions with [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). In future lessons, we'll learn other metrics that are often used with time series.
 
 ```python
 from sklearn.metrics import mean_squared_error
@@ -195,7 +195,7 @@ print("RMSE of forecast predictions:")
 print(rmse_val)
 ```
 
-Our error increased by about 38% from the training set to the validation set. This suggests that our model is having some trouble generalizing, that is, that the trend of the series isn't truly linear.
+Our error increased by about 38% from the training set to the validation set. This suggests that our model is having some trouble generalizing. It's likely that the trend of the series isn't truly linear.
 
 
 # Interpret Predictions #
@@ -207,7 +207,7 @@ plt.figure(figsize=(16,6))
 sns.lineplot(data=data.Interest, alpha=0.5)
 sns.lineplot(data=train_predictions, label='Fitted', color='b')
 sns.lineplot(data=val_predictions, label='Forecast', color='r');
-plt.title("Fitted and forecast predictions from the regression model")
+plt.title("Fitted and forecast predictions from a trend-line model")
 plt.xlabel("Date")
 plt.ylabel("Interest")
 plt.legend(title="Predictions")
@@ -221,7 +221,7 @@ You can see that the popularity of "data science" tends to fall in the summer an
 
 The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've probably worked with before function best, work best when your applied to data that are iid.
 
-One thing we didn't consider was the relative nature of our data. We should consider what we would do if our predictions were above 100 or below 0. We should also consider what a "constant change" means in this context.
+One thing we didn't consider was the nature of the popularity score. For one, the score has to be within 0 and 100 if we are to preserve the original interpretation. But a linear-trend model could return scores outside of this range. What would we do with a forecast of -20? Of 175? We might also wonder whether RMSE is the right error metric to use for this kind of data.
 
 # Your Turn #
 
