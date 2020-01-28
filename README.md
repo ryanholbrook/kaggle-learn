@@ -79,12 +79,12 @@ Design a sequence model with Keras.
 # References
 
 - Bell, F., & Smyl, S. *Forecasting at Uber: An Introduction.* Uber. https://eng.uber.com/forecasting-introduction/ Accessed on January 24, 2020.
-- Chollet, F. *Deep learning with Python.* Manning Publications Co.
-- Cowpertwait, P. S. P., & Metcalfe, A. V. *Introductory time series with R.* Springer. 2009ed.
+- Chollet, F. (2017) *Deep learning with Python.* Manning Publications Co. 1ed.
+- Cowpertwait, P. S. P., & Metcalfe, A. V. (2009) *Introductory time series with R.* Springer. 2009ed.
 - Diebold, F. X. (2020) *Forecasting.* Department of Economics, University of Pennsylvania, http://www.ssc.upenn.edu/~fdiebold/Textbooks.html
 - Hyndman, R.J., & Athanasopoulos, G. (2018) *Forecasting: principles and practice*, 2nd edition, OTexts: Melbourne, Australia. OTexts.com/fpp2. Accessed on January 24, 2020.
 - Mark, T., Lemon, K. N., Vandenbosch, M., Bulla, J., & Maruotti, A. *Capturing the Evolution of Customer–Firm Relationships: How Customers Become More (or Less) Valuable Over Time.* , 89(3), 231–245.
-- Nielsen, A. *Practical time series analysis: prediction with statistics and machine learning.* O'Reilly Media, Inc. 1ed.
-- Sanchez, J. *Markov Models for Time Series - An Introduction Using R.* Chapman & Hall/CRC Press. 2ed.
+- Nielsen, A. (2019) *Practical time series analysis: prediction with statistics and machine learning.* O'Reilly Media, Inc. 1ed.
+- Zucchini, W., MacDonald, I. L., Langrock, R. (2016) *Hidden Markov Models for Time Series - An Introduction Using R.* Chapman & Hall/CRC Press. 2ed.
 - Tilgner, M. *Time series forecasting with random forest.* Statworx. https://www.statworx.com/de/blog/time-series-forecasting-with-random-forest/ Accessed on January 24, 2020.
-- Wooldridge, J. M. *Introductory Econometrics: A Modern Approach.* Cengage Learning. 6ed.
+- Wooldridge, J. M. (2015) *Introductory Econometrics: A Modern Approach.* Cengage Learning. 6ed.
