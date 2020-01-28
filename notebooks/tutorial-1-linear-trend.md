@@ -231,10 +231,11 @@ plt.show()
 
 You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) It's apparent that there is information we aren't using that could help us make our predictions better. Later we'll see models that can make use of this kind of seasonal pattern.
 
+What report would you give your boss? How confident would you be in a forecast made from this model?
 
 # Conclusion #
 
-The defining property of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information and also a strong constraint.
+The defining property of time series is their *dependence on a temporal order*. This temporal dependence is both a useful source of information and also a strong constraint.
 
 In this lesson we looked at a number important topics: trends and seasons in time series, the importance of preserving the temporal order, how a model can make use of this ordering. These topics are central to the understanding of time series modeling and they will recur throughout this course.
 

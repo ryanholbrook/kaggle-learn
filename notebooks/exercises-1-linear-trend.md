@@ -38,6 +38,7 @@ machinelearning.head()
 Try plotting the time series. Use the default `pandas` methods or experiment with `seaborn`. Try calling `dir(plt)` to see the methods available to modify the plot and look at help files with `?plt.method`.
 
 ```python
+# Your code here
 
 ```
 
@@ -45,7 +46,7 @@ What is different about this time series from the time series for "data science"
 
 # Create a Time Dummy #
 
-Now get your data ready for modeling. First create a time dummy from the `Week`.
+Now get your data ready for modeling. First create a time dummy from the `Week` variable.
 
 ```python
 # Your code here
@@ -54,7 +55,7 @@ machinelearning['Week'] = ____
 
 # Create and Evaluation Split #
 
-Now Split the time series into a training set and a validation set, being sure to preserve the time order.
+Now split the time series into a training set and a validation set, being sure to preserve the original ordering.
 
 ```python
 from sklearn.model_selection import train_test_split
@@ -74,7 +75,7 @@ formula = ____ # 'Interest ~ Week'
 
 # Fit Model #
 
-Define a linear regression model using the formula interface to `statsmodels`.
+Define a linear regression model for the trend-line using the formula interface to `statsmodels`.
 
 ```python
 import statsmodels.formula.api as smf
@@ -96,6 +97,17 @@ rmse_train = ____
 val_predictions = ____
 rmse_val = ____
 ```
+
+# Interpret #
+
+Plot the fitted and forecast predictions over a line chart of the original time series.
+
+```python
+# Your code here
+
+```
+
+Do you feel a linear trend-line model is appropriate for this data-set? Would you be comfortable making forecasts?
 
 # Discuss #
 
