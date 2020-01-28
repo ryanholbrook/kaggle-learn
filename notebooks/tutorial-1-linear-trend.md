@@ -23,7 +23,7 @@ After completing this micro-course, you'll be able to:
 - Predict the daily page-views of a website with [Prophet](https://facebook.github.io/prophet/).
 - Estimate market demand for a ride-sharing company with XGBoost.
 - Discover highly-profitable customers with a Markov model. And,
-- Build a deep learning model with Keras and predict the weather.
+- Build a deep learning model with Keras to predict the weather.
 
 You'll be prepared for this micro-course if you know how to [construct a machine learning model](https://www.kaggle.com/dansbecker/your-first-machine-learning-model), [manipulate dataframes with Pandas](https://www.kaggle.com/residentmario/indexing-selecting-assigning), and [use seaborn to explore your data](https://www.kaggle.com/alexisbcook/hello-seaborn). You'll have a leg up if you've done some work on the [House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques) competition, but we'll review what we need as we go.
 
@@ -32,9 +32,9 @@ You'll be prepared for this micro-course if you know how to [construct a machine
 
 A **time series** is simply a sequence of observations together with the times those observations occured. The times provide an **index** to the observations. Usually, the observations will have been made over some fixed time interval, like every hour or every month.
 
-Time series are very common. They occur virtually anywhere data is collected sequentially over time. They have been used to analyze and predict: economic growth, volatility in financial markets, neural behavior, natural disasters like earthquakes and volcanoes, and many others.
+Time series are very common. They occur virtually anywhere data is collected sequentially over time. Time series are used to analyze such things as: economic growth, volatility in financial markets, EEG brainwave signals, natural disasters like earthquakes and volcanoes.
 
-What characterizes time series is that their observations are sequentially **dependent**. How the observations are ordered in time is important. This different from ordinary data sets where the rows can be taken in any order without affecting the analysis.
+What characterizes time series is that their observations are **sequentially dependent**. How the observations are ordered in time is important. This is different from ordinary data sets where the rows can be taken in any order without affecting the analysis.
 
 Time series analysis is mostly about working with the extra information that this time dependence provides. Over this micro-course, you'll learn about a number of models especially designed for time series and what to do to make sure you get the most from your data.
 
@@ -60,13 +60,13 @@ datascience = pd.read_csv('../data/datascience.csv', parse_dates=['Week'], index
 And let's get a quick overview.
 
 ```python
-# View the first five weeks of the datascience dataset
+# View the first five weeks of the dataset
 datascience.head()
 ```
 
 The numbers in the `Interest` column represent the popularity for that week relative to when the term was most popular over the time observed. Google says: "A value of 100 is the peak popularity for the term. A value of 50 means that the term is half as popular. A score of 0 means there was not enough data for this term."
 
-It's good to look at some summary statistics to know what to expect from your data.
+It's good to look at some summary statistics, as well.
 
 ```python
 datascience.describe()
@@ -81,21 +81,25 @@ import matplotlib.pyplot as plt
 
 Time series are commonly represented as [line charts](https://www.kaggle.com/alexisbcook/line-charts), with the index along the x-axis. A line chart emphasizes the ordered nature of a time series.
 
-You can quickly plot a data frame with the `DataFrame.plot` method. For time series, `pandas` will create a line chart by default.
+You can quickly plot a time series with the `DataFrame.plot` method. For time series, `pandas` will create a line chart by default.
 
 ```python
 datascience.plot();
 ```
 
-For more detailed plots, we'll turn to [seaborn](https://seaborn.pydata.org/index.html). You may have learned about `seaborn` in a [previous micro-course](https://www.kaggle.com/learn/data-visualization). `seaborn` is a powerful and flexible supplement to `matplotlib` for statistical visualization that makes it easy to create impressive data visualizations.
+For more detailed plots, we'll turn to [seaborn](https://seaborn.pydata.org/index.html). You may have learned about `seaborn` in a [previous micro-course](https://www.kaggle.com/learn/data-visualization). `seaborn` is a powerful and flexible supplement to `matplotlib` for statistical visualization.
 
 First let's set up the plotting environment.
 
 ```python
 import seaborn as sns
-# Change to seaborn style
+
+# With 'sns.set' you can set default parameters for your plots
+# With no arguments, it sets the parameters to the seaborn 'darkgrid' style
 sns.set()
-# Make things a little more legible
+
+# 'plt.rc' modifies default matplotlib properties
+# You can also pass these as a dictionary to 'sns.set'
 plt.rc('axes', labelweight='bold', labelsize='large',
        titleweight='bold', titlesize='x-large')
 plt.rc('xtick', labelsize='large')
@@ -108,55 +112,66 @@ Now we can get a better visualization of our time series. You can add method cal
 ```python
 plt.figure(figsize=(16,6))
 plt.title("Popularity of 'data science'")
-sns.lineplot(data=datascience); plt.show()
+# Use 'sns.lineplot' when plotting time series
+sns.lineplot(data=datascience);
 ```
 
 
 # Fitting a Trend-Line #
 
-Because time series are temporally dependent, there ought to be some predictive information in the time index itself, that is, we should be able to treat the time index as a feature.
+Because time series are temporally dependent, there ought to be some predictive information in the time index itself. We should be able to treat the time index as a feature.
 
-One of the most important ways a time series can depend on time is through a *trend*, meaning a steady rise or fall in the series. Whenever a series is constantly increasing or constantly decreasing on the average, we can capture this trend with a line.
+The time-dependence in a time series can occur in many ways. One of the most important is through a **trend**, meaning a steady rise or fall in the series. Whenever a series is constantly increasing or constantly decreasing on the average, we can capture this trend with a line.
 
-For our first model, we will fit a *linear trend-line* using [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature.
+For our first model in this micro-course, we will fit a **linear trend-line** using [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression). Our trend-line model will fit a least-squares line with `Interest` as the target and `Week` as the feature. See the next figure for an example of a linear trend-line.
 
 | ![Time Series with a Linear Trend](../images/linear-trend.png) |
 |:--:|
-| *A Time Series with a Linear Trend* |
+| *A Time Series with a Linear Trend and a Trend-Line* |
 
 # Prepare Data #
 
-There are two issues we must address when preparing our data for training. 
+We will follow the usual procedure of evaluating our model with a training set and a validation set. There are two issues we must address, however, before splitting the data.
 
-First, the least-squares model requires numeric features. Since the `Week` variable is a date type, we can't construct the model on it directly. Instead, we represent it with a *time dummy*. The time dummy is just an enumeration of the periods in the time series, beginning at 1. The time dummy for `Week` will go: 1, 2, 3, ..., 261, one for each week.
+First, the least-squares algorithm requires numeric features. Since the `Week` variable is a date type, we can't construct the model on it directly. Instead, we represent it with a **time dummy**. The time dummy is just an enumeration of the periods in the time series, beginning at 1. The time dummy for `Week` will go: 1, 2, 3, ..., 261, one for each week.
 
 ```python
-data = datascience.copy()
 # Construct the "time dummy": 1, 2, 3, ...
-data['Week'] = range(1, len(data.Interest) + 1)
+datascience['Week'] = range(1, len(datascience.index) + 1)
 
-data.head()
+datascience.head()
 ```
 
 ```python
-data.tail()
+datascience.tail()
 ```
 
-Second, we need to be careful when we split our data. Ordinarily, it is good practice to suffle your data set before splitting to ensure the splits are independent. But independent is exactly what the observations in a time series are not. By shuffling, we would destroy that.
+Second, we need to be careful when splitting the data into training set and validation set. Ordinarily, it is good practice to shuffle your data set before splitting to ensure the splits are statistically independent. Time series models, however, rely on the data *not* being independent. This is what makes time series special. We must make sure when splitting to **preserve the original order**.
 
-In forecasting, we want to use information about the past to predict the future. We want to make sure, therefore, that all of the validation data occurs *after* the training data. With time series, the validation set should always be later in time than the training set.
+Also, in forecasting, we use information about the past to predict the future. We want to make sure, therefore, that all of the validation data occurs *after* the training data. With time series, **the validation set should always be later in time than the training set**.
 
 ```python
 from sklearn.model_selection import train_test_split
 
 # Split the data into a training set and a validation set
 # The order of the observations is important, so don't shuffle
-train_data, val_data = train_test_split(data, test_size = 0.2, shuffle = False)
+# And have the training set come before the validation set
+train_data, val_data = train_test_split(datascience, test_size = 0.2, shuffle = False)
 ```
+
+Now let's check that we get what we expected.
+
+```python
+train_data.tail()
+```
+```python
+val_data.head()
+```
+
 
 # Define and Fit the Model #
 
-Many of our models for this micro-course will come from the `statsmodels` library. `statsmodels` is like the `sklearn` of time series. It has a number of powerful time series models as well as methods for analysis and visualization.
+Many of our models for this micro-course will come from the `statsmodels` library. `statsmodels` is like the `sklearn` of time series.
 
 The easiest way to get started with `statsmodels` is through its [formula interface](https://www.statsmodels.org/stable/example_formulas.html). Formulas in `statsmodels` work the same way as formulas in R. Instead of passing in our variables as arrays (like in `sklearn`), in `statsmodels` we can specify the regression relationship with a special kind of string and let `statsmodels` create the arrays for us.
 
@@ -176,7 +191,7 @@ The `Intercept` parameter tells us the y-intercept for the line and the `Week` p
 
 # Evaluate the Model #
 
-We'll evaluate our predictions with [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). In future lessons, we'll learn other metrics that are often used with time series.
+We'll evaluate our predictions with [root-mean-square error](https://en.wikipedia.org/wiki/Root-mean-square_deviation) (RMSE). In future lessons, we'll learn other metrics often used for time series.
 
 ```python
 from sklearn.metrics import mean_squared_error
@@ -195,7 +210,7 @@ print("RMSE of forecast predictions:")
 print(rmse_val)
 ```
 
-Our error increased by about 38% from the training set to the validation set. This suggests that our model is having some trouble generalizing. It's likely that the trend of the series isn't truly linear.
+The error increased by about 38% from the training set to the validation set. This suggests that our model is having some trouble generalizing. Something changed in the time series during the forecast period.
 
 
 # Interpret Predictions #
@@ -204,24 +219,25 @@ Let's make a plot of our predictions to get a better idea of what's going on.
 
 ```python
 plt.figure(figsize=(16,6))
-sns.lineplot(data=data.Interest, alpha=0.5)
+sns.lineplot(data=datascience.Interest, alpha=0.5)
 sns.lineplot(data=train_predictions, label='Fitted', color='b')
 sns.lineplot(data=val_predictions, label='Forecast', color='r');
-plt.title("Fitted and forecast predictions from a trend-line model")
+plt.title("Fitted and forecast predictions")
 plt.xlabel("Date")
 plt.ylabel("Interest")
 plt.legend(title="Predictions")
 plt.show()
 ```
 
-You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) There's information we aren't using that could help us make our predictions better. In future lessons, we'll see models that can make use of this kind of information.
+You can see that the popularity of "data science" tends to fall in the summer and winter and rise Spring and Fall. (Students on break from school?) It's apparent that there is information we aren't using that could help us make our predictions better. Later we'll see models that can make use of this kind of seasonal pattern.
 
 
 # Conclusion #
 
-The defining feature of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information, but also a strong constraint. If you haven't worked with time series before, it's likely that . The models you've probably worked with before function best, work best when your applied to data that are iid.
+The defining property of time series is their dependence on a temporal order. This temporal dependence is both a useful source of information and also a strong constraint.
 
-One thing we didn't consider was the nature of the popularity score. For one, the score has to be within 0 and 100 if we are to preserve the original interpretation. But a linear-trend model could return scores outside of this range. What would we do with a forecast of -20? Of 175? We might also wonder whether RMSE is the right error metric to use for this kind of data.
+In this lesson we looked at a number important topics: trends and seasons in time series, the importance of preserving the temporal order, how a model can make use of this ordering. These topics are central to the understanding of time series modeling and they will recur throughout this course.
+
 
 # Your Turn #
 

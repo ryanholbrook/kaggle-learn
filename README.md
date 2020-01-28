@@ -41,7 +41,8 @@ Benchmark your models.
 Learn how to do it right.
 
 - Error Measurements
-- Cross Validation
+- Cross Validation with Time Dependent Data
+- Time Series Gotchas
 
 ## Regression ##
 

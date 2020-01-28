@@ -35,44 +35,72 @@ machinelearning.head()
 
 # Plot It #
 
-Now try plotting the time series. Try calling `dir(plt)` to see the methods available to modify the plot and look at their help file with `?plt.method`.
+Try plotting the time series. Use the default `pandas` methods or experiment with `seaborn`. Try calling `dir(plt)` to see the methods available to modify the plot and look at help files with `?plt.method`.
 
 ```python
-# TODO
+
 ```
 
-What is different about this time series from the time series for "data science"? How do you expect this will affect our predictions?
+What is different about this time series from the time series for "data science"? How do you expect this will affect your predictions?
 
-# Split the Data #
+# Create a Time Dummy #
 
-It is important that you do not shuffle time series data before splitting it. With time series, the order of our data sets must be preserved.
+Now get your data ready for modeling. First create a time dummy from the `Week`.
 
-Split the time series into a training set and a validation set, being sure to preserve the time order.
+```python
+# Your code here
+machinelearning['Week'] = ____
+```
+
+# Create and Evaluation Split #
+
+Now Split the time series into a training set and a validation set, being sure to preserve the time order.
 
 ```python
 from sklearn.model_selection import train_test_split
 
-# TODO
+# Your code here
+train_data, val_data = ____
 ```
 
-# Fit the Model #
+# Specify Model #
+
+Check your understanding of formulas. Give the appropriate formula for the trend-line model.
 
 ```python
-# modeling
+# Your code here
+formula = ____ # 'Interest ~ Week'
+```
+
+# Fit Model #
+
+Define a linear regression model using the formula interface to `statsmodels`.
+
+```python
 import statsmodels.formula.api as smf
-from sklearn.metrics import mean_squared_error
 
-# TODO
+# Your code here
+machinelearning_model = ____
 ```
-
-Give the appropriate formula for the trend-line model.
-
-```python
-# 'Interest ~ Week'
-```
-
 
 # Evaluate #
 
+Make predictions from the fitted model and evaluate its performance.
+
+```python
+from sklearn.metrics import mean_squared_error
+
+# Your code here
+train_predictions = ____
+rmse_train = ____
+val_predictions = ____
+rmse_val = ____
+```
+
 # Discuss #
 
+One thing we haven't considered in this lesson was the nature of the popularity score. For one, the score has to be within 0 and 100 if we are to preserve the original interpretation. But a linear-trend model could return scores outside of this range. What would we do with a forecast of -20? Of 175? We might also wonder whether RMSE is the right error metric to use for this kind of data.
+
+# Keep Going! #
+
+You're doing great! Move on to the next lesson and learn about how to break time series down into simpler parts.
