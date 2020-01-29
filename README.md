@@ -2,6 +2,7 @@
 
 Learn how to make forecasts with one of the most common kinds of data in the real world.
 
+<!-- Header Image -->
 
 # Lessons #
 ## Linear Trends ##
